@@ -13,42 +13,42 @@ create table public.user_cummulated
 
 --faster way to excetute for a range of dates
 
-    -- DO $$
-    -- DECLARE
-    --     startdate DATE := DATE '2023-01-01';
-    --     end_date   DATE := DATE '2023-01-31';
-    --     currentdate DATE := DATE '2023-01-01';
-    -- BEGIN
-    --     WHILE currentdate <= end_date LOOP
-    --         INSERT INTO public.user_cummulated
-    --         WITH yesterday AS (
-    --             SELECT *
-    --             FROM public.user_cummulated
-    --             WHERE current__date = (currentdate - INTERVAL '1 day')::date
-    --         ),
-    --         today AS (
-    --             SELECT CAST(user_id AS TEXT) AS user_id,
-    --                    DATE(event_time) AS date_active
-    --             FROM public.events
-    --             WHERE DATE(event_time) = currentdate AND user_id IS NOT NULL
-    --             GROUP BY user_id, DATE(event_time)
-    --         )
-    --         SELECT
-    --             CAST(COALESCE(t.user_id, y.user_id) AS TEXT) AS user_id,
-    --             CASE
-    --                 WHEN y.dates_active IS NULL AND t.date_active IS NOT NULL THEN ARRAY[t.date_active]
-    --                 WHEN t.date_active IS NULL THEN y.dates_active
-    --                 ELSE ARRAY[t.date_active] || y.dates_active
-    --             END AS dates_active,
-    --             CASE
-    --                 WHEN t.date_active IS NOT NULL THEN t.date_active
-    --                 ELSE y.current__date + INTERVAL '1 day'
-    --             END AS current__date
-    --         FROM today t
-    --         FULL OUTER JOIN yesterday y ON t.user_id = y.user_id;
-    --         currentdate := currentdate + INTERVAL '1 day';
-    --     END LOOP;
-    -- END $$;
+    DO $$
+    DECLARE
+        startdate DATE := DATE '2023-01-01';
+        end_date   DATE := DATE '2023-01-31';
+        currentdate DATE := DATE '2023-01-01';
+    BEGIN
+        WHILE currentdate <= end_date LOOP
+            INSERT INTO public.user_cummulated
+            WITH yesterday AS (
+                SELECT *
+                FROM public.user_cummulated
+                WHERE current__date = (currentdate - INTERVAL '1 day')::date
+            ),
+            today AS (
+                SELECT CAST(user_id AS TEXT) AS user_id,
+                       DATE(event_time) AS date_active
+                FROM public.events
+                WHERE DATE(event_time) = currentdate AND user_id IS NOT NULL
+                GROUP BY user_id, DATE(event_time)
+            )
+            SELECT
+                CAST(COALESCE(t.user_id, y.user_id) AS TEXT) AS user_id,
+                CASE
+                    WHEN y.dates_active IS NULL AND t.date_active IS NOT NULL THEN ARRAY[t.date_active]
+                    WHEN t.date_active IS NULL THEN y.dates_active
+                    ELSE ARRAY[t.date_active] || y.dates_active
+                END AS dates_active,
+                CASE
+                    WHEN t.date_active IS NOT NULL THEN t.date_active
+                    ELSE y.current__date + INTERVAL '1 day'
+                END AS current__date
+            FROM today t
+            FULL OUTER JOIN yesterday y ON t.user_id = y.user_id;
+            currentdate := currentdate + INTERVAL '1 day';
+        END LOOP;
+    END $$;
 
     --  SELECT * FROM public.user_cummulated order by current__date desc
 
