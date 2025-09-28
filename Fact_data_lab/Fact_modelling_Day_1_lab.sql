@@ -4,14 +4,14 @@
 -- count(1) from game_details GROUP BY 1,2,3
 
 -- HAVING COUNT(1) > 1
--- with game_deduped as (
--- select g.game_date_est,gd.*, row_number () over (partition by gd.game_id,
--- gd.team_id,gd.player_id order by g.game_date_est) as row_num
--- from public.game_details gd join public.games g
--- on g.game_id = gd.game_id
--- )
+with game_deduped as (
+select g.game_date_est,gd.*, row_number () over (partition by gd.game_id,
+gd.team_id,gd.player_id order by g.game_date_est) as row_num
+from public.game_details gd c public.games g
+on g.game_id = gd.game_id
+)
 
--- select * from game_deduped where row_num = 1 
+select * from game_deduped where row_num = 1 
 -- limit 100000;
 
 --The "when" factor of every fact table is actually
