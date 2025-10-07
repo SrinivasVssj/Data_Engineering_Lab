@@ -30,7 +30,7 @@ create table public.user_cummulated
                 SELECT CAST(user_id AS TEXT) AS user_id,
                        DATE(event_time) AS date_active
                 FROM public.events
-                WHERE DATE(event_time) = currentdate AND user_id IS NOT NULL
+                WHERE DATE(event_time) = DATE '2023-01-01' AND user_id IS NOT NULL
                 GROUP BY user_id, DATE(event_time)
             )
             SELECT
@@ -93,3 +93,5 @@ group by user_id order by combined_bits_count desc;
 
 --- the above is usually used in companies like meta, tiktok, etc to calculate daily active users, weekly active users, monthly active users
 --- and also to calculate retention rates, churn rates, etc.
+
+SELECT * from public.user_cummulated order by current__date desc;

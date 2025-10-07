@@ -1,13 +1,13 @@
 -- we are implementing reduced facts and shuffling concept int his lab
-drop TABLE if EXISTS PUBLIC.array_metrics;
-create Table if not EXISTS PUBLIC.array_metrics
-(
-    user_id NUMERIC,
-    month_start DATE,
-    metric_name TEXT,
-    metric_array real[],
-     PRIMARY key (user_id, month_start, metric_name)
-);
+-- drop TABLE if EXISTS PUBLIC.array_metrics;
+-- create Table if not EXISTS PUBLIC.array_metrics
+-- (
+--     user_id NUMERIC,
+--     month_start DATE,
+--     metric_name TEXT,
+--     metric_array real[],
+--      PRIMARY key (user_id, month_start, metric_name)
+-- );
 
 --  Building Reduced facts for for month of Jan 2023
 --  we will loop through each day of the month and update or insert into array_metrics table
@@ -71,3 +71,5 @@ select metric_name, month_start,
     select metric_name, month_start,  total_daily_hits, 
     month_start + (cast(cast(nr-1 as text) || ' day' as interval) ) as daily_date from three_day_agg ta 
     CROSS join unnest(ta.total_metric) WITH ORDINALITY AS a(total_daily_hits,nr)
+
+    select * from PUBLIC.array_metrics;

@@ -35,4 +35,27 @@ insert into public.user_devices_cumulated (user_id, activity)
     ON CONFLICT (user_id) DO UPDATE
     SET activity = EXCLUDED.activity;
 
- select * from public.user_devices_cumulated ;
+ select * from public.user_devices_cumulated uc 
+-- query to unwrap json and get key value pairs
+ 
+ with base_unwraped_query as (
+  select user_id,key as browser_type,value as date_list   from public.user_devices_cumulated uc, lateral jsonb_each(uc.activity::jsonb)
+ )
+ select * from base_unwraped_query;
+
+--  query to generate datelist_int column
+
+ SELECT
+    user_id,
+    jsonb_object_agg(
+        key, 
+        (
+            SELECT jsonb_agg(TO_CHAR(value::date, 'YYYYMMDD')::int)
+            FROM jsonb_array_elements_text(value) v
+        )
+    ) AS datelist_int
+FROM public.user_devices_cumulated,
+     LATERAL jsonb_each(activity::jsonb)
+GROUP BY user_id;
+
+ 
